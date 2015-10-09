@@ -250,7 +250,6 @@ got_shardkey: {
         g_array_append_val(shard_keys, shardkey1);
     }
 
-    printf("%d %d %s\n",shard_key_value,type,value_buf);
 }
     return SHARDING_RET_OK;
 }
@@ -1053,7 +1052,6 @@ static sharding_result_t sharding_get_dbgroup_by_hash(GArray* hited_db_groups, s
     gint group_count = shard_groups->len;
     if (shard_key->type == SHARDING_SHARDKEY_VALUE_EQ) {
         gint group_index = shard_key->value % group_count;
-        printf("group index:%d",group_index);
         if (group_index < shard_groups->len) {
             group_hash_map_t *hash_map = &g_array_index(shard_groups, group_hash_map_t, group_index);
             if (hash_map) {

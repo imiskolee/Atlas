@@ -1329,6 +1329,8 @@ static network_socket_retval_t sharding_query_handle(parse_info_t *parse_info, G
             db_group_t *dbgroup_obj = g_ptr_array_index(config->db_groups, dbgroup_index);
             if (dbgroup_obj == NULL) { continue; }
 
+			printf("start shared %d\n",dbgroup_index);
+
             if (trans_ctx->trans_stage == TRANS_STAGE_IN_TRANS && trans_ctx->in_trans_dbgroup_ctx != NULL && trans_ctx->in_trans_dbgroup_ctx->group_id != dbgroup_obj->group_id) {
                 sharding_proxy_send_error_result("Proxy Warning - sharding dbgroup is in trans, transaction will not work across multi dbgroup", con,
                         recv_sock, packets, ER_CANT_DO_THIS_DURING_AN_TRANSACTION, "25000");
