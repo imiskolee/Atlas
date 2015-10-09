@@ -137,7 +137,8 @@ sharding_result_t value_list_got_shardkey(GArray *shard_keys, Expr *expr, gboole
         GArray *value_list = g_array_sized_new(FALSE, FALSE, sizeof(gint64), expr->pList->nExpr);
         for (i = 0; i < expr->pList->nExpr; i++) {
             Expr *value_expr = expr->pList->a[i].pExpr;
-            if (value_expr->op != TK_INTEGER) { continue; }
+
+            //if (value_expr->op != TK_INTEGER) { continue; }
 
             dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
             gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
@@ -167,7 +168,7 @@ sharding_result_t value_list_got_shardkey(GArray *shard_keys, Expr *expr, gboole
     } else {
         for (i = 0; i < expr->pList->nExpr; i++) {
             Expr *value_expr = expr->pList->a[i].pExpr;
-            if (value_expr->op != TK_INTEGER) { continue; }
+           // if (value_expr->op != TK_INTEGER) { continue; }
 
             dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
             gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
@@ -205,12 +206,12 @@ G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr 
     Expr *left_expr = expr->pLeft, *right_expr = expr->pRight;
     const char *shardkey_name = shard_rule->shard_key->str, *shard_table = shard_rule->table_name->str;
 
-    if (left_expr != NULL && right_expr != NULL && LEMON_TOKEN_STRING(left_expr->op) && right_expr->op == TK_INTEGER &&
+    if (left_expr != NULL && right_expr != NULL && LEMON_TOKEN_STRING(left_expr->op) &&
             strncasecmp(shardkey_name, (const char*)left_expr->token.z, left_expr->token.n) == 0) 
     {
         goto got_shardkey;
     } else if(left_expr != NULL && right_expr != NULL && left_expr->op == TK_DOT && left_expr->pLeft != NULL &&
-            LEMON_TOKEN_STRING(left_expr->pLeft->op) && right_expr->op == TK_INTEGER && 
+            LEMON_TOKEN_STRING(left_expr->pLeft->op)  &&
             strncasecmp(shard_table, (const char*)left_expr->pLeft->token.z, left_expr->pLeft->token.n) == 0 && 
             strncasecmp(shardkey_name, (const char*)left_expr->pRight->token.z, left_expr->pRight->token.n) == 0) 
     { // where shardtable.id = 1;
@@ -243,9 +244,7 @@ sharding_result_t between_got_shardkey(GArray *shard_keys, Expr *expr, gboolean 
     shard_key_t shardkey1, shardkey2;
     Expr *begin_expr = expr->pList->a[0].pExpr, *end_expr = expr->pList->a[1].pExpr;
 
-    if (begin_expr->op != TK_INTEGER || end_expr->op != TK_INTEGER) {
-        return SHARDING_RET_OK;
-    }
+
 
     dup_token2buff(value_buf, sizeof(value_buf), begin_expr->token);
     gint range_begin = g_ascii_strtoll(value_buf, NULL, 10);
