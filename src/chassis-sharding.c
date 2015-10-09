@@ -250,6 +250,8 @@ got_shardkey: {
         g_array_append_val(shard_keys, shardkey1);
     }
 
+    printf("%d %s\n",shard_key_value,value_buf);
+
 }
     return SHARDING_RET_OK;
 }
@@ -923,6 +925,9 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
 
                     dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
                     gint64 shard_key_value = bkdr_hash(value_buf);
+
+                    printf("%d %s\n",shard_key_value,value_buf);
+
                     init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
                     g_array_append_val(shard_keys, shard_key_obj);
 
