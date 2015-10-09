@@ -284,7 +284,7 @@ got_shardkey: {
         g_array_append_val(shard_keys, shardkey1);
     }
 
-    printf("%d %s\n",shard_key_value,value_buf);
+    printf("%d %s\n",shard_key_value,value_buf_parser);
 
 }
     return SHARDING_RET_OK;
