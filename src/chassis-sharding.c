@@ -202,8 +202,6 @@ sharding_result_t value_list_shard_key_append(GArray *shard_keys, Expr *expr, co
 
 G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr *expr, const sharding_table_t *shard_rule, gboolean is_not_opr) {
 
-printf("start parser value_shard_key_append where.");
-
 char value_buf[256] = {0};
     shard_key_t shardkey1, shardkey2;
     Expr *left_expr = expr->pLeft, *right_expr = expr->pRight;
@@ -224,7 +222,7 @@ char value_buf[256] = {0};
     }
 
 got_shardkey: {
-    printf("start parser shard.");
+
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
     gint64 shard_key_value = 0;
 
@@ -238,7 +236,6 @@ got_shardkey: {
         dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
         //gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
         shard_key_value = bkdr_hash(value_buf);
-        shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
 
         printf("%d %s",shard_key_value,value_buf);
 
@@ -255,9 +252,12 @@ got_shardkey: {
         g_array_append_val(shard_keys, shardkey1);
         g_array_append_val(shard_keys, shardkey2);
     } else {
+        printf();
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
+
+    printf("%d \n",type);
 }
     return SHARDING_RET_OK;
 }
@@ -900,8 +900,6 @@ postorder_traversal:
 static sharding_result_t parse_sharding_keys_from_where_expr(GArray *shard_keys, const sharding_table_t *sharding_table_rule, parse_info_t *parse_info) {
     Parse *parse_obj = parse_info->parse_obj;
     Expr *where_expr = parse_get_where_expr(parse_obj);
-
-    printf("start parse_sharding_keys_from_where_expr\n");
 
     if (where_expr == NULL) {
         return SHARDING_RET_ALL_SHARD;
@@ -1671,7 +1669,7 @@ network_backend_t* sharding_get_rw_backend(network_backends_t *backends) {
         backend = network_backends_get(backends, i);
         if (backend == NULL) { continue; }
 
-        if (chassis_event_thread_pool(backend) == NULL) { continue; }
+        if (make in(backend) == NULL) { continue; }
     
         if (backend->type == BACKEND_TYPE_RW && backend->state == BACKEND_STATE_UP) {
             break;
