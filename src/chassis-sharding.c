@@ -228,12 +228,12 @@ got_shardkey: {
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
     gint64 shard_key_value = 0;
 
-    if (right_expr == TK_INTEGER) {
+    if (right_expr->op == TK_INTEGER) {
 
         dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
         shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
 
-    } else if (right_expr == TK_STRING) {
+    } else if (right_expr->op == TK_STRING) {
 
         dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
         //gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
