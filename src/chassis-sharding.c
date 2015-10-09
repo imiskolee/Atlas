@@ -201,8 +201,7 @@ sharding_result_t value_list_shard_key_append(GArray *shard_keys, Expr *expr, co
 }
 
 G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr *expr, const sharding_table_t *shard_rule, gboolean is_not_opr) {
-
-char value_buf[256] = {0};
+    char value_buf[128] = {0};
     shard_key_t shardkey1, shardkey2;
     Expr *left_expr = expr->pLeft, *right_expr = expr->pRight;
     const char *shardkey_name = shard_rule->shard_key->str, *shard_table = shard_rule->table_name->str;
@@ -221,28 +220,10 @@ char value_buf[256] = {0};
         return SHARDING_RET_ERR_NO_SHARDKEY;
     }
 
-got_shardkey: {
-
+got_shardkey:
+    dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
+    gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
-    gint64 shard_key_value = 0;
-
-    if (right_expr->op == TK_INTEGER) {
-
-        dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
-        shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
-
-    } else if (right_expr->op == TK_STRING) {
-
-        dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
-        //gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
-        shard_key_value = bkdr_hash(value_buf);
-
-
-
-
-    }
-
-
     if (is_not_opr) {
         type = reverse_shard_key(type);
     }
@@ -255,9 +236,6 @@ got_shardkey: {
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
-
-    printf("%d %d %s",shard_key_value,type,value_buf);
-}
     return SHARDING_RET_OK;
 }
 
@@ -900,8 +878,6 @@ static sharding_result_t parse_sharding_keys_from_where_expr(GArray *shard_keys,
     Parse *parse_obj = parse_info->parse_obj;
     Expr *where_expr = parse_get_where_expr(parse_obj);
 
-    printf("start parse_sharding_keys_from_where_expr\n");
-
     if (where_expr == NULL) {
         return SHARDING_RET_ALL_SHARD;
     }
@@ -969,7 +945,7 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
                 init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
                 g_array_append_val(shard_keys, shard_key_obj);
 
-            }else if(value_expr->op == TK_STRING && value_expr->token.n < 256){
+            }else if(value_expr->op == TK_STRING){
 
                 dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
                 gint64 shard_key_value = bkdr_hash(value_buf);
@@ -1670,7 +1646,7 @@ network_backend_t* sharding_get_rw_backend(network_backends_t *backends) {
         backend = network_backends_get(backends, i);
         if (backend == NULL) { continue; }
 
-        if (makein(backend) == NULL) { continue; }
+        if (chassis_event_thread_pool(backend) == NULL) { continue; }
     
         if (backend->type == BACKEND_TYPE_RW && backend->state == BACKEND_STATE_UP) {
             break;
