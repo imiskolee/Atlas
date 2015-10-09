@@ -70,7 +70,7 @@ int str_delete_qoute(char *str,char *parse,unsigned int size){
 
     char first = (char)*str;
 
-    unsigned int start_offset = 0;
+    unsigned int start = 0;
     unsigned int len = 0;
 
     if(first == '\'' || first == '\"'){
