@@ -220,23 +220,24 @@ G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr 
         return SHARDING_RET_ERR_NO_SHARDKEY;
     }
 
-got_shardkey:
-        shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
-        gint64 shard_key_value = 0;
+got_shardkey: {
+    shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
+    gint64 shard_key_value = 0;
 
-        if(right_expr == TK_INTEGER){
+    if (right_expr == TK_INTEGER) {
 
         dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
         shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
 
-        }else if(right_expr == TK_STRING){
+    } else if (right_expr == TK_STRING) {
 
         dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
         //gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
-         shard_key_value = bkdr_hash(value_buf);
+        shard_key_value = bkdr_hash(value_buf);
         shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
 
     }
+
 
     if (is_not_opr) {
         type = reverse_shard_key(type);
@@ -250,6 +251,7 @@ got_shardkey:
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
+}
     return SHARDING_RET_OK;
 }
 
