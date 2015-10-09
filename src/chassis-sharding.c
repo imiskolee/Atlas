@@ -201,7 +201,7 @@ sharding_result_t value_list_shard_key_append(GArray *shard_keys, Expr *expr, co
 }
 
 G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr *expr, const sharding_table_t *shard_rule, gboolean is_not_opr) {
-    char value_buf[128] = {0};
+    char value_buf[256] = {0};
     shard_key_t shardkey1, shardkey2;
     Expr *left_expr = expr->pLeft, *right_expr = expr->pRight;
     const char *shardkey_name = shard_rule->shard_key->str, *shard_table = shard_rule->table_name->str;
@@ -220,10 +220,19 @@ G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr 
         return SHARDING_RET_ERR_NO_SHARDKEY;
     }
 
-got_shardkey:
+got_shardkey: {
     dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
-    gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
+    gint64 shard_key_value = 0;
+
+    if(right_expr->op == TK_INTEGER){
+        shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
+
+    }else if(right_expr->op == TK_STRING){
+
+        shard_key_value = bkdr_hash(value_buf);
+    }
+
     if (is_not_opr) {
         type = reverse_shard_key(type);
     }
@@ -236,6 +245,9 @@ got_shardkey:
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
+
+    printf("%d %d %s\n",shard_key_value,type,value_buf);
+}
     return SHARDING_RET_OK;
 }
 
