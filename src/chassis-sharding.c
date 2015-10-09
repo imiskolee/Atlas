@@ -201,7 +201,10 @@ sharding_result_t value_list_shard_key_append(GArray *shard_keys, Expr *expr, co
 }
 
 G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr *expr, const sharding_table_t *shard_rule, gboolean is_not_opr) {
-    char value_buf[256] = {0};
+
+printf("start parser where.");
+
+char value_buf[256] = {0};
     shard_key_t shardkey1, shardkey2;
     Expr *left_expr = expr->pLeft, *right_expr = expr->pRight;
     const char *shardkey_name = shard_rule->shard_key->str, *shard_table = shard_rule->table_name->str;
@@ -221,6 +224,7 @@ G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr 
     }
 
 got_shardkey: {
+    printf("start parser shard.");
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
     gint64 shard_key_value = 0;
 
