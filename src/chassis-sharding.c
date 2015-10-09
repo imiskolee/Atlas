@@ -221,11 +221,15 @@ G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr 
     }
 
 got_shardkey: {
+
     dup_token2buff(value_buf, sizeof(value_buf), right_expr->token);
+
     shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
+
     gint64 shard_key_value = 0;
 
     if(right_expr->op == TK_INTEGER){
+
         shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
 
     }else if(right_expr->op == TK_STRING){
@@ -1049,6 +1053,7 @@ static sharding_result_t sharding_get_dbgroup_by_hash(GArray* hited_db_groups, s
     gint group_count = shard_groups->len;
     if (shard_key->type == SHARDING_SHARDKEY_VALUE_EQ) {
         gint group_index = shard_key->value % group_count;
+        printf("group index:%d",group_index);
         if (group_index < shard_groups->len) {
             group_hash_map_t *hash_map = &g_array_index(shard_groups, group_hash_map_t, group_index);
             if (hash_map) {
