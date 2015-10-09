@@ -1670,7 +1670,7 @@ network_backend_t* sharding_get_rw_backend(network_backends_t *backends) {
         backend = network_backends_get(backends, i);
         if (backend == NULL) { continue; }
 
-        if (make in(backend) == NULL) { continue; }
+        if (makein(backend) == NULL) { continue; }
     
         if (backend->type == BACKEND_TYPE_RW && backend->state == BACKEND_STATE_UP) {
             break;
