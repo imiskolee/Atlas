@@ -66,6 +66,37 @@ unsigned long bkdr_hash(const char *str){
 
 }
 
+int str_delete_qoute(char *str,char *parse,unsigned int size){
+
+    char first = (char)*str;
+
+    unsigned int start_offset = 0;
+    unsigned int len = 0;
+
+    if(first == '\'' || first == '\"'){
+
+       start = 1;
+
+    }
+
+    char end =(char) *(str + size -1);
+
+    if(end == '\'' || end == '\"'){
+
+        len = size -1;
+
+    }else{
+
+        len = size;
+    }
+
+    memcpy(parse,str+start,len);
+
+    return 1;
+
+}
+
+
 G_INLINE_FUNC shard_key_type_t sql_token_id2shard_key_type(int token_id) {
     switch (token_id) {
         case TK_GT:
@@ -228,13 +259,16 @@ got_shardkey: {
 
     gint64 shard_key_value = 0;
 
+    char value_buf_parser[256] = {0};
+
     if(right_expr->op == TK_INTEGER){
 
         shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
 
-    }else if(right_expr->op == TK_STRING){
+    }else if(right_expr->op == TK_STRING && right_expr->token.n < 256){
 
-        shard_key_value = bkdr_hash(value_buf);
+        str_delete_qoute(value_buf,value_buf_parser,right_expr->token.n);
+        shard_key_value = bkdr_hash(value_buf_parser);
     }
 
     if (is_not_opr) {
@@ -908,6 +942,8 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
     Insert *insert_obj = parse_obj->parsed.array[0].result.insertObj;
     int i;
     char value_buf[256] = {0};
+    char value_buf_parser[256] = {0};
+
     shard_key_t shard_key_obj;
 
     if (insert_obj->pSetList != NULL) { // INSERT INTO test(name) SET name = 'test'; 
@@ -924,9 +960,10 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
                 }else if(value_expr->op == TK_STRING && value_expr->token.n < 256){
 
                     dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
-                    gint64 shard_key_value = bkdr_hash(value_buf);
+                    str_delete_qoute(value_buf,value_buf_parser,right_expr->token.n);
+                    gint64 shard_key_value = bkdr_hash(value_buf_parser);
 
-                    printf("%d %s\n",shard_key_value,value_buf);
+
 
                     init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
                     g_array_append_val(shard_keys, shard_key_obj);
@@ -966,11 +1003,12 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
                 g_array_append_val(shard_keys, shard_key_obj);
 
             }else if(value_expr->op == TK_STRING){
-
                 dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
-                gint64 shard_key_value = bkdr_hash(value_buf);
+                str_delete_qoute(value_buf,value_buf_parser,right_expr->token.n);
+                gint64 shard_key_value = bkdr_hash(value_buf_parser);
                 init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
                 g_array_append_val(shard_keys, shard_key_obj);
+                printf("%d %s\n",shard_key_value,value_buf_parser);
 
             }
         }
