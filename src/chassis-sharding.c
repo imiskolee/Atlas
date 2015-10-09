@@ -162,17 +162,20 @@ static gint gint64_compare_func(gconstpointer value1, gconstpointer value2) {
 }
 
 sharding_result_t value_list_got_shardkey(GArray *shard_keys, Expr *expr, gboolean is_not_opr) {
-    char value_buf[128] = {0};
+    char value_buf[256] = {0};
     gint i;
     if (is_not_opr) {
         GArray *value_list = g_array_sized_new(FALSE, FALSE, sizeof(gint64), expr->pList->nExpr);
         for (i = 0; i < expr->pList->nExpr; i++) {
             Expr *value_expr = expr->pList->a[i].pExpr;
 
-            //if (value_expr->op != TK_INTEGER) { continue; }
+            if(value_expr->op != TK_INTEGER){
+                continue;
+            }
 
             dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
-            gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
+            gint64 shard_key_value = 0;
+            shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
             g_array_unique_append_val(value_list, &shard_key_value, gint64_compare_func); // value in value_list is sorted by g_array_unique_append_val
         }
         if (value_list->len > 0) {
@@ -283,8 +286,6 @@ got_shardkey: {
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
-
-    printf("%d %s\n",shard_key_value,value_buf_parser);
 
 }
     return SHARDING_RET_OK;
@@ -1008,7 +1009,7 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
                 gint64 shard_key_value = bkdr_hash(value_buf_parser);
                 init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
                 g_array_append_val(shard_keys, shard_key_obj);
-                printf("%d %s\n",shard_key_value,value_buf_parser);
+
 
             }
         }
