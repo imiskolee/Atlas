@@ -237,7 +237,7 @@ got_shardkey: {
         //gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
         shard_key_value = bkdr_hash(value_buf);
 
-        printf("%d %s",shard_key_value,value_buf);
+
 
 
     }
@@ -252,12 +252,11 @@ got_shardkey: {
         g_array_append_val(shard_keys, shardkey1);
         g_array_append_val(shard_keys, shardkey2);
     } else {
-
         init_value_shard_key_t(&shardkey1, type, shard_key_value);
         g_array_append_val(shard_keys, shardkey1);
     }
 
-    printf("%lld %d %s\n",shard_key_value,type,value_buf);
+    printf("%d %d %s",shard_key_value,type,value_buf);
 }
     return SHARDING_RET_OK;
 }
@@ -900,6 +899,8 @@ postorder_traversal:
 static sharding_result_t parse_sharding_keys_from_where_expr(GArray *shard_keys, const sharding_table_t *sharding_table_rule, parse_info_t *parse_info) {
     Parse *parse_obj = parse_info->parse_obj;
     Expr *where_expr = parse_get_where_expr(parse_obj);
+
+    printf("start parse_sharding_keys_from_where_expr\n");
 
     if (where_expr == NULL) {
         return SHARDING_RET_ALL_SHARD;
