@@ -236,6 +236,9 @@ got_shardkey: {
         shard_key_value = bkdr_hash(value_buf);
         shard_key_type_t type = sql_token_id2shard_key_type(expr->op);
 
+        printf("%d %s",shard_key_value,value_buf);
+
+
     }
 
 
