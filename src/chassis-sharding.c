@@ -47,6 +47,25 @@
         (type == SHARDING_SHARDKEY_VALUE_LT ||  \
          type == SHARDING_SHARDKEY_VALUE_LTE)
 
+
+
+unsigned long bkdr_hash(const char *str){
+
+    int seed = 13131;
+    unsigned long hash = 0;
+
+    unsigned  char *iter = (unsigned char *)str;
+
+    while(*iter){
+
+        hash = (hash *seed ) + (*iter++);
+
+    }
+
+    return hash % 0x7FFFFFFF;
+
+}
+
 G_INLINE_FUNC shard_key_type_t sql_token_id2shard_key_type(int token_id) {
     switch (token_id) {
         case TK_GT:
@@ -878,7 +897,8 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
     if (insert_obj->pSetList != NULL) { // INSERT INTO test(name) SET name = 'test'; 
         for (i = 0; i < insert_obj->pSetList->nExpr; i++) {
             Expr *value_expr = insert_obj->pSetList->a[i].pExpr;
-            if (value_expr->op == TK_INTEGER && strcasecmp(sharding_table_rule->shard_key->str, insert_obj->pSetList->a[i].zName) == 0) {
+            if (strcasecmp(sharding_table_rule->shard_key->str, insert_obj->pSetList->a[i].zName) == 0) {
+
                 dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
                 gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
                 init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
@@ -909,7 +929,7 @@ static sharding_result_t parse_sharding_keys_from_insert_sql(GArray* shard_keys,
         for (i = 0; i < insert_obj->pValuesList->nValues; i++) {
             ExprList *value_list = insert_obj->pValuesList->a[i];
             Expr *value_expr = value_list->a[value_index].pExpr;
-            if (value_expr->op == TK_INTEGER) {
+            if (value_expr) {
                 dup_token2buff(value_buf, sizeof(value_buf), value_expr->token);
                 gint64 shard_key_value = g_ascii_strtoll(value_buf, NULL, 10);
                 init_value_shard_key_t(&shard_key_obj, SHARDING_SHARDKEY_VALUE_EQ, shard_key_value);
