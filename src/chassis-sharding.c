@@ -83,7 +83,7 @@ int str_delete_qoute(char *str,char *parse,unsigned int size){
 
     if(end == '\'' || end == '\"'){
 
-        len = size -1;
+        len = size - 1 - start;
 
     }else{
 
