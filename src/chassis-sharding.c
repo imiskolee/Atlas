@@ -202,7 +202,7 @@ sharding_result_t value_list_shard_key_append(GArray *shard_keys, Expr *expr, co
 
 G_INLINE_FUNC sharding_result_t value_shard_key_append(GArray *shard_keys, Expr *expr, const sharding_table_t *shard_rule, gboolean is_not_opr) {
 
-printf("start parser where.");
+printf("start parser value_shard_key_append where.");
 
 char value_buf[256] = {0};
     shard_key_t shardkey1, shardkey2;
@@ -900,6 +900,8 @@ postorder_traversal:
 static sharding_result_t parse_sharding_keys_from_where_expr(GArray *shard_keys, const sharding_table_t *sharding_table_rule, parse_info_t *parse_info) {
     Parse *parse_obj = parse_info->parse_obj;
     Expr *where_expr = parse_get_where_expr(parse_obj);
+
+    printf("start parse_sharding_keys_from_where_expr\n");
 
     if (where_expr == NULL) {
         return SHARDING_RET_ALL_SHARD;
